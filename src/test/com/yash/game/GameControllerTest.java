@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -20,6 +21,9 @@ public class GameControllerTest {
 
     @InjectMocks
     GameController gameController;
+
+    @Mock
+    GameService gameService;
 
     @Test
     public void startGameWithOK() throws Exception {
@@ -44,24 +48,36 @@ public class GameControllerTest {
         assertNotNull(responseEntity.getBody());
     }
 
-//    @Test
-//    public void startGameWithGameSession() throws Exception {
-//        HttpStatus expectedStatus = HttpStatus.OK;
-//
-//        GameSession expectedGameSession = new GameSession();
-//        expectedGameSession.setGameId("34563");
-//        expectedGameSession.setOptions("Options[ 1 : Door1, 2 : Door2, 3 : Door3, 0 : Terminate Game]");
-//
-//        Mockito.when()
-//
-//        ResponseEntity responseEntity = gameController.startGame();
-//
-//
-//
-//        HttpStatus actualStatus = responseEntity.getStatusCode();
-//
-//        assertEquals(expectedStatus.value(), actualStatus.value());
-//        assertNotNull(responseEntity.getBody());
-//
-//    }
+    @Test
+    public void generateGameIdCalled() throws Exception {
+
+        gameController.startGame();
+        Mockito.verify(gameService).generateGameId();
+    }
+
+    @Test
+    public void startGameReturnsGameSession() throws Exception {
+
+        HttpStatus expectedStatus = HttpStatus.OK;
+
+        Integer id = 34563;
+
+        GameSession expectedGameSession = new GameSession();
+        expectedGameSession.setGameId(id.toString());
+        expectedGameSession.setOptions("Options[ 1 : Door1, 2 : Door2, 3 : Door3, 0 : Terminate Game]");
+
+        Mockito.when(gameService.generateGameId()).thenReturn(id);
+
+        ResponseEntity responseEntity = gameController.startGame();
+
+        HttpStatus actualStatus = responseEntity.getStatusCode();
+        GameSession actualGameSession = (GameSession)responseEntity.getBody();
+
+        assertEquals(expectedStatus.value(), actualStatus.value());
+        assertNotNull(responseEntity.getBody());
+
+        assertEquals(expectedGameSession.getGameId(), actualGameSession.getGameId());
+        assertEquals(expectedGameSession.getOptions(), actualGameSession.getOptions());
+
+    }
 }

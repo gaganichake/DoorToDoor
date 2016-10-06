@@ -23,4 +23,12 @@ public class GameSession {
     public void setOptions(String options) {
         this.options = options;
     }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"gameId\" : \"" + gameId + '\"' +
+                ", \"options\" : \"" + options + '\"' +
+                '}';
+    }
 }
