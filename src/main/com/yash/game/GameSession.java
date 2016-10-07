@@ -1,11 +1,15 @@
 package com.yash.game;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Created by gagan.ichake on 06-10-2016.
  */
+@Component
 public class GameSession {
 
     private String gameId;

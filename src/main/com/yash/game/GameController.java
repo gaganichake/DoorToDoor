@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by gagan.ichake on 06-10-2016.
  */
@@ -21,18 +24,25 @@ public class GameController {
     @RequestMapping(value = "/start", method = RequestMethod.GET)
     public ResponseEntity startGame() {
 
+        String gameId = gameService.startGameWithUniqueGameId();
+
         GameSession gameSession = new GameSession();
-        gameSession.setGameId(gameService.generateGameId().toString());
+        gameSession.setGameId(gameId);
         gameSession.setOptions("Options[ 1 : Door1, 2 : Door2, 3 : Door3, 0 : Terminate Game]");
+
+
 
         return new ResponseEntity(gameSession, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/open", method = RequestMethod.GET)
-    public ResponseEntity<GameSession> openDoor(@RequestParam String gameId, @RequestParam Integer doorNumber) {
-
-        GameSession gameSession = gameService.updateDoorStatusAsOpen("0", 0);
-
-        return new ResponseEntity<GameSession>(gameSession, HttpStatus.OK);
+    public ResponseEntity openDoor(@RequestParam String gameId, @RequestParam Integer doorNumber) {
+        GameSession gameSession = null;
+        try {
+            gameSession = gameService.updateDoorStatusAsOpen(gameId, doorNumber);
+        } catch (InvalidDoorException e) {
+            return new ResponseEntity("This is a invalid door, Please start game for getting new GameID", HttpStatus.OK);
+        }
+        return new ResponseEntity(gameSession, HttpStatus.OK);
     }
 }

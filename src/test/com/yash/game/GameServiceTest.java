@@ -1,11 +1,13 @@
 package com.yash.game;
 
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by gagan.ichake on 06-10-2016.
@@ -19,19 +21,29 @@ public class GameServiceTest {
     @Test
     public void generateGameId() throws Exception {
 
-       assertNotNull(gameService.generateGameId());
+       assertNotNull(gameService.startGameWithUniqueGameId());
     }
 
     @Test
-    public void generateGameIdAsInteger() throws Exception {
+    public void generateGameIdAsString() throws Exception {
 
-        Integer id = gameService.generateGameId();
+        String gameId = gameService.startGameWithUniqueGameId();
 
-        assertNotNull(id);
+        assertNotNull(gameId);
     }
 
     @Test
-    public void ShouldReturnGameId(){
+    public void generateGameIdShouldBeUnique() throws Exception {
+
+        String gameId1 = gameService.startGameWithUniqueGameId();
+
+        String gameId2 = gameService.startGameWithUniqueGameId();
+
+        assertNotEquals(gameId1, gameId2);
+    }
+
+    @Test
+    public void ShouldReturnGameId()throws Exception{
         String gameId = "0";
         Integer doorNumber = 1;
 
@@ -42,8 +54,9 @@ public class GameServiceTest {
         assertEquals(expectedGameSession.getGameId(),actualGameSession.getGameId());
     }
 
+
     @Test
-    public void DoorNumberShouldHaveOpenStatus() {
+    public void DoorNumberShouldHaveOpenStatus() throws Exception{
         String gameId = "0";
         Integer doorNumber = 1;
 
@@ -55,7 +68,7 @@ public class GameServiceTest {
     }
 
     @Test
-    public void WhenDoor1IsOpenedAllOtherDoorsShouldBeClosed() {
+    public void WhenDoor1IsOpenedAllOtherDoorsShouldBeClosed() throws Exception{
         String gameId = "0";
         Integer doorNumber = 1;
         Integer doorNumber2 = 2;
@@ -73,7 +86,7 @@ public class GameServiceTest {
     }
 
     @Test
-    public void WhenDoor2IsOpenedAllOtherDoorsShouldBeClosed() {
+    public void WhenDoor2IsOpenedAllOtherDoorsShouldBeClosed()throws Exception {
         String gameId = "0";
         Integer doorNumber = 1;
         Integer doorNumber2 = 2;
@@ -89,8 +102,9 @@ public class GameServiceTest {
         assertEquals(actualGameSession.getDoorStatus().get(doorNumber2), expectedGameSession.getDoorStatus().get(doorNumber2));
         assertEquals(actualGameSession.getDoorStatus().get(doorNumber3), expectedGameSession.getDoorStatus().get(doorNumber3));
     }
+
     @Test
-    public void WhenDoor3IsOpenedAllOtherDoorsShouldBeClosed() {
+    public void WhenDoor3IsOpenedAllOtherDoorsShouldBeClosed() throws Exception {
         String gameId = "0";
         Integer doorNumber = 1;
         Integer doorNumber2 = 2;
@@ -105,5 +119,42 @@ public class GameServiceTest {
         assertEquals(actualGameSession.getDoorStatus().get(doorNumber), expectedGameSession.getDoorStatus().get(doorNumber));
         assertEquals(actualGameSession.getDoorStatus().get(doorNumber2), expectedGameSession.getDoorStatus().get(doorNumber2));
         assertEquals(actualGameSession.getDoorStatus().get(doorNumber3), expectedGameSession.getDoorStatus().get(doorNumber3));
+    }
+
+    @Test(expected = InvalidDoorException.class)
+    public void moreThan3DoorsNotAllowed() throws Exception{
+        String gameId = "0";
+        Integer doorNumber = 1;
+        Integer doorNumber2 = 2;
+        Integer doorNumber3 = 3;
+        GameSession expectedGameSession = new GameSession();
+        expectedGameSession.setGameId(gameId.toString());
+        expectedGameSession.getDoorStatus().put(doorNumber, "Closed");
+        expectedGameSession.getDoorStatus().put(doorNumber2, "Closed");
+        expectedGameSession.getDoorStatus().put(doorNumber3, "Closed");
+
+        Integer doorNumber4 = 4;
+
+        GameSession actualGameSession = gameService.updateDoorStatusAsOpen(gameId.toString(), doorNumber4);
+        assertThat(actualGameSession.getDoorStatus().entrySet(), Matchers.equalTo(expectedGameSession.getDoorStatus().entrySet()));
+    }
+
+    @Test(expected = InvalidDoorException.class)
+    public void ifGotOtherThan3DoorThanThrowException() throws Exception {
+        String gameId = "0";
+        Integer doorNumber = 1;
+        Integer doorNumber2 = 2;
+        Integer doorNumber3 = 3;
+        GameSession expectedGameSession = new GameSession();
+        expectedGameSession.setGameId(gameId.toString());
+        expectedGameSession.getDoorStatus().put(doorNumber, "Closed");
+        expectedGameSession.getDoorStatus().put(doorNumber2, "Closed");
+        expectedGameSession.getDoorStatus().put(doorNumber3, "Closed");
+
+        Integer doorNumber4 = 4;
+        when(gameService.updateDoorStatusAsOpen(gameId.toString(), doorNumber4)).thenThrow(new InvalidDoorException());
+
+        GameSession actualGameSession = gameService.updateDoorStatusAsOpen(gameId.toString(), doorNumber4);
+        assertThat(actualGameSession.getDoorStatus().entrySet(), Matchers.equalTo(expectedGameSession.getDoorStatus().entrySet()));
     }
 }

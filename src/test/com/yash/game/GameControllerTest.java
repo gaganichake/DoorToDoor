@@ -52,19 +52,19 @@ public class GameControllerTest {
     public void generateGameIdCalled() throws Exception {
 
         gameController.startGame();
-        Mockito.verify(gameService).generateGameId();
+        Mockito.verify(gameService).startGameWithUniqueGameId();
     }
 
     @Test
     public void startGameReturnsGameSession() throws Exception {
 
         HttpStatus expectedStatus = HttpStatus.OK;
-        Integer id = 34563;
+        String id = "34563";
         GameSession expectedGameSession = new GameSession();
         expectedGameSession.setGameId(id.toString());
         expectedGameSession.setOptions("Options[ 1 : Door1, 2 : Door2, 3 : Door3, 0 : Terminate Game]");
 
-        Mockito.when(gameService.generateGameId()).thenReturn(id);
+        Mockito.when(gameService.startGameWithUniqueGameId()).thenReturn(id);
 
         ResponseEntity responseEntity = gameController.startGame();
         HttpStatus actualStatus = responseEntity.getStatusCode();
@@ -78,7 +78,7 @@ public class GameControllerTest {
     }
 
     @Test
-    public void openDoorWithOK() {
+    public void openDoorWithOK() throws InvalidDoorException {
 
         HttpStatus expectedStatus = HttpStatus.OK;
         ResponseEntity responseEntity = gameController.openDoor("0", 0);
@@ -91,7 +91,10 @@ public class GameControllerTest {
     public void openDoorWithMessageBody() throws Exception {
 
         HttpStatus expectedStatus = HttpStatus.OK;
-        ResponseEntity responseEntity = gameController.openDoor("0", 0);
+
+        Mockito.when(gameService.updateDoorStatusAsOpen("0", 2)).thenReturn(new GameSession());
+
+        ResponseEntity responseEntity = gameController.openDoor("0", 2);
         HttpStatus actualStatus = responseEntity.getStatusCode();
 
         assertEquals(expectedStatus.value(), actualStatus.value());
@@ -107,6 +110,8 @@ public class GameControllerTest {
         GameSession expectedGameSession = new GameSession();
         expectedGameSession.setGameId(gameId);
         expectedGameSession.setOptions("Options[ 1 : Door1, 2 : Door2, 3 : Door3, 0 : Terminate Game]");
+
+        Mockito.when(gameService.updateDoorStatusAsOpen(gameId, doorNumber)).thenReturn(expectedGameSession);
 
         ResponseEntity responseEntity = gameController.openDoor(gameId, doorNumber);
         HttpStatus actualStatus = responseEntity.getStatusCode();
@@ -131,6 +136,8 @@ public class GameControllerTest {
         expectedGameSession.setOptions("Options[ 1 : Door1, 2 : Door2, 3 : Door3, 0 : Terminate Game]");
         java.util.Map<Integer, String> doorStatus = expectedGameSession.getDoorStatus();
         doorStatus.put(doorNumber, "Open");
+
+        Mockito.when(gameService.updateDoorStatusAsOpen(gameId, doorNumber)).thenReturn(expectedGameSession);
 
         ResponseEntity responseEntity = gameController.openDoor(gameId, doorNumber);
 
@@ -158,11 +165,10 @@ public class GameControllerTest {
         HttpStatus expectedStatus = HttpStatus.OK;
         String gameId = "0";
         Integer doorNumber = 1;
-
         GameSession expectedGameSession = new GameSession();
-        expectedGameSession.setGameId(gameId.toString());
+        expectedGameSession.setGameId(gameId);
         expectedGameSession.setOptions("XYZ");
-        java.util.Map<Integer, String> doorStatus = expectedGameSession.getDoorStatus();//
+        java.util.Map<Integer, String> doorStatus = expectedGameSession.getDoorStatus();
 
         Mockito.when(gameService.updateDoorStatusAsOpen(gameId, doorNumber)).thenReturn(expectedGameSession);
 
@@ -176,6 +182,23 @@ public class GameControllerTest {
         assertEquals(expectedGameSession.getGameId(), actualGameSession.getGameId());
         assertEquals(expectedGameSession.getOptions(), actualGameSession.getOptions());
         assertEquals(expectedGameSession.getDoorStatus().get(doorNumber), actualGameSession.getDoorStatus().get(doorNumber));
+
+    }
+
+    @Test
+    public void ifOtherThanDoor3CalledExceptionMessageShouldBeThrownWithMessage() throws Exception {
+
+        String expectedMessage = "This is a invalid door, Please start game for getting new GameID";
+        String gameId = "0";
+        Integer doorNumber = 4;
+
+        Mockito.when(gameService.updateDoorStatusAsOpen(gameId, doorNumber)).thenThrow(InvalidDoorException.class);
+
+        ResponseEntity responseEntity = gameController.openDoor(gameId, doorNumber);
+
+        String actualMessage = responseEntity.getBody().toString();
+
+        assertEquals(expectedMessage, actualMessage);
 
     }
 

@@ -1,9 +1,13 @@
 package com.yash.game;
 
+import org.apache.tomcat.util.file.Matcher;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import java.util.HashMap;
 
 import static org.junit.Assert.*;
 
@@ -31,4 +35,17 @@ public class GameSessionTest {
 
     }
 
+    @Test
+    public void doorStatusValue() throws Exception {
+
+        java.util.Map<Integer, String> expectedDoorStatus = new HashMap<Integer, String>() {{
+            put(1, "Closed");
+            put(2, "Closed");
+            put(3, "Closed");
+        }};
+
+        GameSession gameSession = new GameSession();
+
+        assertThat(gameSession.getDoorStatus().entrySet(), Matchers.equalTo(expectedDoorStatus.entrySet()));
+    }
 }
