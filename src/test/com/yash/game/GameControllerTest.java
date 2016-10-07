@@ -59,9 +59,7 @@ public class GameControllerTest {
     public void startGameReturnsGameSession() throws Exception {
 
         HttpStatus expectedStatus = HttpStatus.OK;
-
         Integer id = 34563;
-
         GameSession expectedGameSession = new GameSession();
         expectedGameSession.setGameId(id.toString());
         expectedGameSession.setOptions("Options[ 1 : Door1, 2 : Door2, 3 : Door3, 0 : Terminate Game]");
@@ -69,15 +67,116 @@ public class GameControllerTest {
         Mockito.when(gameService.generateGameId()).thenReturn(id);
 
         ResponseEntity responseEntity = gameController.startGame();
+        HttpStatus actualStatus = responseEntity.getStatusCode();
+        GameSession actualGameSession = (GameSession)responseEntity.getBody();
+
+        assertEquals(expectedStatus.value(), actualStatus.value());
+        assertNotNull(actualGameSession);
+        assertEquals(expectedGameSession.getGameId(), actualGameSession.getGameId());
+        assertEquals(expectedGameSession.getOptions(), actualGameSession.getOptions());
+
+    }
+
+    @Test
+    public void openDoorWithOK() {
+
+        HttpStatus expectedStatus = HttpStatus.OK;
+        ResponseEntity responseEntity = gameController.openDoor("0", 0);
+        HttpStatus actualStatus = responseEntity.getStatusCode();
+
+        assertEquals(expectedStatus.value(), actualStatus.value());
+    }
+
+    @Test
+    public void openDoorWithMessageBody() throws Exception {
+
+        HttpStatus expectedStatus = HttpStatus.OK;
+        ResponseEntity responseEntity = gameController.openDoor("0", 0);
+        HttpStatus actualStatus = responseEntity.getStatusCode();
+
+        assertEquals(expectedStatus.value(), actualStatus.value());
+        assertNotNull(responseEntity.getBody());
+    }
+
+    @Test
+    public void openDoorReturnsGameSession() throws Exception {
+
+        HttpStatus expectedStatus = HttpStatus.OK;
+        String gameId = "0";
+        Integer doorNumber = 1;
+        GameSession expectedGameSession = new GameSession();
+        expectedGameSession.setGameId(gameId);
+        expectedGameSession.setOptions("Options[ 1 : Door1, 2 : Door2, 3 : Door3, 0 : Terminate Game]");
+
+        ResponseEntity responseEntity = gameController.openDoor(gameId, doorNumber);
+        HttpStatus actualStatus = responseEntity.getStatusCode();
+        GameSession actualGameSession = (GameSession)responseEntity.getBody();
+
+        assertEquals(expectedStatus.value(), actualStatus.value());
+        assertNotNull(actualGameSession);
+        assertEquals(expectedGameSession.getGameId(), actualGameSession.getGameId());
+        assertEquals(expectedGameSession.getOptions(), actualGameSession.getOptions());
+
+    }
+
+    @Test
+    public void openDoorReturnsGameStatus() throws Exception {
+
+        HttpStatus expectedStatus = HttpStatus.OK;
+
+        String gameId = "0";
+        Integer doorNumber = 1;
+        GameSession expectedGameSession = new GameSession();
+        expectedGameSession.setGameId(gameId);
+        expectedGameSession.setOptions("Options[ 1 : Door1, 2 : Door2, 3 : Door3, 0 : Terminate Game]");
+        java.util.Map<Integer, String> doorStatus = expectedGameSession.getDoorStatus();
+        doorStatus.put(doorNumber, "Open");
+
+        ResponseEntity responseEntity = gameController.openDoor(gameId, doorNumber);
+
+        HttpStatus actualStatus = responseEntity.getStatusCode();
+        GameSession actualGameSession = (GameSession)responseEntity.getBody();
+        assertEquals(expectedStatus.value(), actualStatus.value());
+        assertNotNull(actualGameSession);
+        assertEquals(expectedGameSession.getGameId(), actualGameSession.getGameId());
+        assertEquals(expectedGameSession.getOptions(), actualGameSession.getOptions());
+
+        assertEquals(expectedGameSession.getDoorStatus().get(doorNumber), actualGameSession.getDoorStatus().get(doorNumber));
+
+    }
+
+    @Test
+    public void openDoorShouldCallGameService() throws Exception {
+
+        gameController.openDoor("0", 0);
+        Mockito.verify(gameService).updateDoorStatusAsOpen("0", 0);
+    }
+
+    @Test
+    public void openDoorShouldGetGameSessionFromService() throws Exception {
+
+        HttpStatus expectedStatus = HttpStatus.OK;
+        String gameId = "0";
+        Integer doorNumber = 1;
+
+        GameSession expectedGameSession = new GameSession();
+        expectedGameSession.setGameId(gameId.toString());
+        expectedGameSession.setOptions("XYZ");
+        java.util.Map<Integer, String> doorStatus = expectedGameSession.getDoorStatus();//
+
+        Mockito.when(gameService.updateDoorStatusAsOpen(gameId, doorNumber)).thenReturn(expectedGameSession);
+
+        ResponseEntity responseEntity = gameController.openDoor(gameId, doorNumber);
 
         HttpStatus actualStatus = responseEntity.getStatusCode();
         GameSession actualGameSession = (GameSession)responseEntity.getBody();
 
         assertEquals(expectedStatus.value(), actualStatus.value());
-        assertNotNull(responseEntity.getBody());
-
+        assertNotNull(actualGameSession);
         assertEquals(expectedGameSession.getGameId(), actualGameSession.getGameId());
         assertEquals(expectedGameSession.getOptions(), actualGameSession.getOptions());
+        assertEquals(expectedGameSession.getDoorStatus().get(doorNumber), actualGameSession.getDoorStatus().get(doorNumber));
 
     }
+
 }

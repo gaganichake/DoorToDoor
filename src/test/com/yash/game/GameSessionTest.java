@@ -30,4 +30,5 @@ public class GameSessionTest {
         assertEquals(expectedJSONInToString,actualToString);
 
     }
+
 }
