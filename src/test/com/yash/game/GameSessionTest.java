@@ -22,7 +22,7 @@ public class GameSessionTest {
         String expectedJSONInToString = "{\"gameId\" : \"12\"," +" \"options\" : \"XYZ\"" + "}";
 
         GameSession gameSession = new GameSession();
-        gameSession.setGameId("12");
+        gameSession .setGameId("12");
         gameSession.setOptions("XYZ");
 
         String actualToString = gameSession.toString();
