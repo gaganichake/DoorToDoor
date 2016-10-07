@@ -39,6 +39,8 @@ public class GameControllerTest {
     @Test
     public void startGameWithMessageBody() throws Exception {
 
+        Mockito.when(gameService.startGameWithUniqueGameId()).thenReturn(new GameSession());
+
         ResponseEntity responseEntity = gameController.startGame();
         HttpStatus actualStatus = responseEntity.getStatusCode();
 
@@ -64,7 +66,7 @@ public class GameControllerTest {
         expectedGameSession.setGameId(id.toString());
         expectedGameSession.setOptions("Options[ 1 : Door1, 2 : Door2, 3 : Door3, 0 : Terminate Game]");
 
-        Mockito.when(gameService.startGameWithUniqueGameId()).thenReturn(id);
+        Mockito.when(gameService.startGameWithUniqueGameId()).thenReturn(expectedGameSession);
 
         ResponseEntity responseEntity = gameController.startGame();
         HttpStatus actualStatus = responseEntity.getStatusCode();

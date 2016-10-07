@@ -24,15 +24,7 @@ public class GameController {
     @RequestMapping(value = "/start", method = RequestMethod.GET)
     public ResponseEntity startGame() {
 
-        String gameId = gameService.startGameWithUniqueGameId();
-
-        GameSession gameSession = new GameSession();
-        gameSession.setGameId(gameId);
-        gameSession.setOptions("Options[ 1 : Door1, 2 : Door2, 3 : Door3, 0 : Terminate Game]");
-
-
-
-        return new ResponseEntity(gameSession, HttpStatus.OK);
+        return new ResponseEntity(gameService.startGameWithUniqueGameId(), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/open", method = RequestMethod.GET)
@@ -45,4 +37,17 @@ public class GameController {
         }
         return new ResponseEntity(gameSession, HttpStatus.OK);
     }
+
+    @RequestMapping(value = "/close", method = RequestMethod.GET)
+    public ResponseEntity closeGame(@RequestParam String gameId) {
+        String status = null;
+        try {
+            status = gameService.closeGame(gameId);
+        } catch (InvalidDoorException e) {
+            return new ResponseEntity("This is a invalid Game Id, Please start game for getting new GameID", HttpStatus.OK);
+        }
+        return new ResponseEntity(status, HttpStatus.OK);
+
+    }
+
 }
