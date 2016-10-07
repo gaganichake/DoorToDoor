@@ -64,7 +64,7 @@ public class GameControllerTest {
         String id = "34563";
         GameSession expectedGameSession = new GameSession();
         expectedGameSession.setGameId(id.toString());
-        expectedGameSession.setOptions("Options[ 1 : Door1, 2 : Door2, 3 : Door3, 0 : Terminate Game]");
+        expectedGameSession.setOptions("Options[ 1 : Door1, 2 : Door2, 3 : Door3");
 
         Mockito.when(gameService.startGameWithUniqueGameId()).thenReturn(expectedGameSession);
 
@@ -111,7 +111,7 @@ public class GameControllerTest {
         Integer doorNumber = 1;
         GameSession expectedGameSession = new GameSession();
         expectedGameSession.setGameId(gameId);
-        expectedGameSession.setOptions("Options[ 1 : Door1, 2 : Door2, 3 : Door3, 0 : Terminate Game]");
+        expectedGameSession.setOptions("Options[ 1 : Door1, 2 : Door2, 3 : Door3]");
 
         Mockito.when(gameService.updateDoorStatusAsOpen(gameId, doorNumber)).thenReturn(expectedGameSession);
 
@@ -135,7 +135,7 @@ public class GameControllerTest {
         Integer doorNumber = 1;
         GameSession expectedGameSession = new GameSession();
         expectedGameSession.setGameId(gameId);
-        expectedGameSession.setOptions("Options[ 1 : Door1, 2 : Door2, 3 : Door3, 0 : Terminate Game]");
+        expectedGameSession.setOptions("Options[ 1 : Door1, 2 : Door2, 3 : Door3]");
         java.util.Map<Integer, String> doorStatus = expectedGameSession.getDoorStatus();
         doorStatus.put(doorNumber, "Open");
 

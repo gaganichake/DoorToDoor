@@ -21,7 +21,7 @@ public class GameService {
 
         GameSession gameSession = new GameSession();
         gameSession.setGameId(gameId);
-        gameSession.setOptions("Options[ 1 : Door1, 2 : Door2, 3 : Door3, 0 : Terminate Game]");
+        gameSession.setOptions("Options[ 1 : Door1, 2 : Door2, 3 : Door3]");
 
         gamePool.put(gameId, gameSession);
 
